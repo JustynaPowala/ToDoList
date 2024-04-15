@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace ToDoListContracts
 {
-	internal class TaskItemDto
+	public class TaskItemDto
 	{
 		public Guid Id { get; set; }
 		public DateTime Date { get; set; }
 		public string Content { get; set; }
 		public string Status { get; set; }
+		public DateTime CreatedDate { get; set; }
 	}
 }

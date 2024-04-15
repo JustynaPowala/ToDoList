@@ -10,7 +10,7 @@ namespace ToDoList.WebApi.Controllers
 
 
 	[ApiController]
-	[Route("taskitems")]
+	[Route("[controller]")]
 	public class TaskItemsController
 	{
 		private readonly ITaskItemRepository _taskItemRepository;
@@ -43,27 +43,33 @@ namespace ToDoList.WebApi.Controllers
 			return id;
 		}
 
-		[HttpGet("")]
-		public async Task<Guid> AddTaskItemAsync([FromBody] AddTaskItemDto taskDto)
+		[HttpGet("{taskId}")]
+		public async Task<TaskItemDto> GetTaskItemAsync([FromRoute] Guid taskId)
 		{
-			_taskItemValidator.Validate(taskDto.Content);
+			var taskItem = await _taskItemRepository.GetByIdAsync(taskId);
 
-			var id = Guid.NewGuid();
-
-			var newTaskItem = new TaskItem
+			if (taskItem == null)
 			{
-				Id = id,
-				Date = taskDto.Date.Date,
-				Content = taskDto.Content,
-				Status = TaskItemStatus.ToDo,
-				CreatedDate = DateTime.UtcNow,
+				throw new DomainValidationException("Task not found.");
 			};
 
+			var ti = new TaskItemDto
+			{
+				Id = taskItem.Id,
+				Date = taskItem.Date,
+				Content = taskItem.Content,
+				Status = taskItem.Status.ToString(),
+				CreatedDate = taskItem.CreatedDate.Date,
+			};
 
-			await _taskItemRepository.AddAsync(newTaskItem);
-
-			return id;
+			return ti;
 		}
+
+		//[HttpPatch("{taskId}")]
+		//public void ModifyTaskAsync ([FromRoute] Guid taskId, [FromBody] TaskItemDto)
+		//{
+			
+		//}
 
 
 
