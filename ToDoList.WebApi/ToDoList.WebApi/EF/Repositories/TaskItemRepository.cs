@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ToDoList.WebApi.Exceptions;
 using ToDoList.WebApi.Models;
 
 namespace ToDoList.WebApi.EF.Repositories
@@ -31,8 +32,14 @@ namespace ToDoList.WebApi.EF.Repositories
 
 		public async Task<TaskItem> GetByIdAsync(Guid id)
 		{
-			return await _tasks.SingleOrDefaultAsync(x => x.Id == id);
-		}
+			var item = await _tasks.SingleOrDefaultAsync(x => x.Id == id);
+			if (item == null)
+			{
+				throw new EntityNotFoundException(nameof(TaskItem), id);
+			};
+			return item;
+
+        }
 
 		public async Task UpdateAsync(TaskItem taskItem)
 		{

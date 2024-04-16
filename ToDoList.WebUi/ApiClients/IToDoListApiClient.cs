@@ -7,8 +7,9 @@ namespace ToDoList.WebUi.ApiClients
 		Task<Guid> AddTaskItemAsync(DateTime date, string content);
 		Task<IEnumerable<TaskItemDto>> GetQuestionsForDateAsync(DateTime date);
 		Task DeleteItemAsync(Guid id);
-		Task UpdateItemAsync(Guid id, string content, string status);
+		Task UpdateItemContentAsync(Guid id, string content);
+        Task UpdateItemStatusAsync(Guid id, string status);
 
 
-	}
+    }
 }

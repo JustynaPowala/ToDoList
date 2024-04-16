@@ -10,6 +10,56 @@
 <h1>Add Task</h1>
 
 <div class="row">
+    <div class="col-md-2">
+        <label for="taskDate">Choose date:</label>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <input type="date" class="form-control" id="taskDate" @bind="TaskDate"  />
+
+    </div>
+
+    <div class="col-md-6">
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10">
+        <input type="text" class="form-control" id="taskContent" @bind="taskContent" />
+
+    </div>
+
+    <div class="col-md-2">
+
+        <button class="btn btn-primary" @onclick="AddTask">Add Task</button>
+    </div>
+</div>
+
+<div class="row">
+
+
+    @if (tasks != null)
+    {
+        foreach (var task in tasks)
+        {
+            //var checked = task.Status == "Done";
+            var isChecked = task.Status == "Done";
+            <div class="col-md-10">@task.Content</div>
+            <div class ="col-md-1">
+                <input type="radio" name="IsSelected" checked="@isChecked" class="checkbox-design2" @onchange="() => ChangeStatus(task)"  />
+            </div>
+            <div class="col-md-1"> </div>
+        }
+    }
+
+
+    </div>
+
+
+@*<div class="row">
     <div class="col-md-4">
         <h3>Task Form</h3>
         <div class="form-group">
@@ -38,9 +88,19 @@
         </div>
     </div>
 </div>
-
+*@
 @code {
+
+
     private string taskContent = "";
+    private DateTime TaskDate {
+        get { return taskDate; }
+        set
+        {
+            taskDate = value;
+            LoadTasksForDate();
+        }
+    }
     private DateTime taskDate = DateTime.Today;
     private DateTime selectedDate = DateTime.Today;
     private IEnumerable<TaskItemDto> tasks;
@@ -49,9 +109,9 @@
     {
         if (!string.IsNullOrWhiteSpace(taskContent))
         {
-            var utcTaskDate = taskDate.ToUniversalTime().Date;
+            var date = taskDate.Date;
 
-            var taskId = await ToDoListApiClient.AddTaskItemAsync(utcTaskDate, taskContent);
+            var taskId = await ToDoListApiClient.AddTaskItemAsync(date, taskContent);
             // Optionally, you can handle the response here
             // For example, display a success message or navigate to another page
             Console.WriteLine($"Task added with ID: {taskId}");
@@ -65,8 +125,43 @@
         }
     }
 
+    private async Task<bool> ChangeStatus(TaskItemDto taskItem)
+    {
+        return await ErrorCatcherAsync(async () =>
+        {
+            string status;
+            if(taskItem.Status == "Done")
+            {
+                status = "ToDo";
+            }
+            else
+            {
+                status = "Done";
+            }
+            await ToDoListApiClient.UpdateItemStatusAsync(taskItem.Id, status);
+        });
+    }
+
+
     private async Task LoadTasksForDate()
     {
-        tasks = await ToDoListApiClient.GetQuestionsForDateAsync(selectedDate);
+        tasks = await ToDoListApiClient.GetQuestionsForDateAsync(taskDate);
     }
+
+
+    private async Task<bool> ErrorCatcherAsync(Func<Task> action)
+    {
+        try
+        {
+            await action();
+            return true;
+        }
+        catch (ToDoListApiException quizApiException)
+        {
+            ToastService.ShowError(quizApiException.Message);
+            return false;
+        }
+    }
+
+
 }

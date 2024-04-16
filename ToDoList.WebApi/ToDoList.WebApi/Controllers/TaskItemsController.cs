@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography.X509Certificates;
 using ToDoList.WebApi.EF.Repositories;
+using ToDoList.WebApi.Exceptions;
 using ToDoList.WebApi.Models;
-using ToDoList.WebApi.Validators;
+
 using ToDoListContracts;
 
 namespace ToDoList.WebApi.Controllers
@@ -15,7 +16,6 @@ namespace ToDoList.WebApi.Controllers
 	public class TaskItemsController
 	{
 		private readonly ITaskItemRepository _taskItemRepository;
-		private TaskItemDtoValidator _taskItemValidator = new TaskItemDtoValidator();
 
 		public TaskItemsController(ITaskItemRepository taskItemRepository)
 		{
@@ -25,19 +25,9 @@ namespace ToDoList.WebApi.Controllers
 		[HttpPost("")]
 		public async Task<Guid> AddTaskItemAsync([FromBody] AddTaskItemDto taskDto)
 		{
-			_taskItemValidator.Validate(taskDto.Content);
-
+			
 			var id = Guid.NewGuid();
-
-			var newTaskItem = new TaskItem
-			{
-				Id = id,
-				Date = taskDto.Date.Date,
-				Content = taskDto.Content,
-				Status = TaskItemStatus.ToDo,
-				CreatedDate = DateTime.UtcNow,
-			};
-
+			var newTaskItem = TaskItem.Create(id, taskDto.Date.Date, taskDto.Content);
 
 			await _taskItemRepository.AddAsync(newTaskItem);
 
@@ -49,20 +39,8 @@ namespace ToDoList.WebApi.Controllers
 		{
 			var taskItem = await _taskItemRepository.GetByIdAsync(taskId);
 
-			if (taskItem == null)
-			{
-				throw new DomainValidationException("Task not found.");
-			};
-
-			var ti = new TaskItemDto
-			{
-				Id = taskItem.Id,
-				Date = taskItem.Date,
-				Content = taskItem.Content,
-				Status = taskItem.Status.ToString(),
-				CreatedDate = taskItem.CreatedDate.Date,
-			};
-
+			var ti = Convert(taskItem);
+		
 			return ti;
 		}
 
@@ -71,41 +49,74 @@ namespace ToDoList.WebApi.Controllers
 		{
 			var tasks = await _taskItemRepository.GetAllForDateAsync(date.Date);
 
-			return (IEnumerable<TaskItemDto>)tasks;
+			var tasksDto= tasks.Select(x=> Convert(x));
+			
+			return tasksDto;
 		}
 
-		[HttpPatch("{taskId}")]   
-		public async Task ModifyTaskAsync([FromRoute] Guid taskId, [FromBody] UpdateTaskItemDto taskItem)
+		[HttpPut("{taskId}/content")]   
+		public async Task UpdateContentAsync([FromRoute] Guid taskId, [FromBody] UpdateTaskItemContentDto taskItem)
 		{
-			var newStatus =_taskItemValidator.Validate(taskItem.Content, taskItem.Status);
-
 			var task = await _taskItemRepository.GetByIdAsync(taskId);
-			if(task == null)
-			{
-				throw new DomainValidationException("Task not found.");
-			}
 
-			task.Content = taskItem.Content;
-			task.Status= newStatus;
+			task.DefineContent(taskItem.Content);
 
 			await _taskItemRepository.UpdateAsync(task);
 
 		}
+		
+		[HttpPut("{taskId}/status")] 
+        public async Task UpdateStatusAsync([FromRoute] Guid taskId, [FromBody] UpdateTaskItemStatusDto taskItem)
+        {
+            if (Enum.TryParse<TaskItemStatus>(taskItem.Status, true, out var s) == false)
+            {
+				throw new ArgumentException($"Status {taskItem.Status} is not valid.",nameof(taskItem));
+            }
 
-		[HttpDelete("{taskId}")]
+            var task = await _taskItemRepository.GetByIdAsync(taskId);
+            switch (s)
+			{
+				case TaskItemStatus.Done:
+					task.Complete();
+					break;
+				case TaskItemStatus.ToDo:
+					task.MoveBackToToDo();
+				break;
+				default:
+					throw new ArgumentOutOfRangeException("Only 'Done' or 'ToDo' statuses are valid.");
+
+			}
+
+            await _taskItemRepository.UpdateAsync(task);
+
+        }
+
+        [HttpDelete("{taskId}")]
 		public async Task DeleteTaskAsync([FromRoute] Guid taskId)
 		{
 
 			var task = await _taskItemRepository.GetByIdAsync(taskId);
-			if (task == null)
-			{
-				throw new DomainValidationException("Task not found.");
-			}
+			
 
-			task.Status = TaskItemStatus.Deleted;
+			task.Delete();
 
 			await _taskItemRepository.UpdateAsync(task);
 
 		}
-	}
+
+		public static TaskItemDto Convert(TaskItem taskItem)
+		{
+            var ti = new TaskItemDto
+            {
+                Id = taskItem.Id,
+                Date = taskItem.Date,
+                Content = taskItem.Content,
+                Status = taskItem.Status.ToString(),
+                CreatedDate = taskItem.CreatedDate.Date,
+            };
+
+			return ti;
+
+        }
+    }
 }
