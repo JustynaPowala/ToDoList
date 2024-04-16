@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography.X509Certificates;
 using ToDoList.WebApi.EF.Repositories;
 using ToDoList.WebApi.Models;
@@ -65,13 +66,46 @@ namespace ToDoList.WebApi.Controllers
 			return ti;
 		}
 
-		//[HttpPatch("{taskId}")]
-		//public void ModifyTaskAsync ([FromRoute] Guid taskId, [FromBody] TaskItemDto)
-		//{
-			
-		//}
+		[HttpGet("")]
+		public async Task<IEnumerable<TaskItemDto>> GetTaskItemsForDate([FromQuery] DateTime date)
+		{
+			var tasks = await _taskItemRepository.GetAllForDateAsync(date.Date);
 
+			return (IEnumerable<TaskItemDto>)tasks;
+		}
 
+		[HttpPatch("{taskId}")]   
+		public async Task ModifyTaskAsync([FromRoute] Guid taskId, [FromBody] UpdateTaskItemDto taskItem)
+		{
+			var newStatus =_taskItemValidator.Validate(taskItem.Content, taskItem.Status);
 
+			var task = await _taskItemRepository.GetByIdAsync(taskId);
+			if(task == null)
+			{
+				throw new DomainValidationException("Task not found.");
+			}
+
+			task.Content = taskItem.Content;
+			task.Status= newStatus;
+
+			await _taskItemRepository.UpdateAsync(task);
+
+		}
+
+		[HttpDelete("{taskId}")]
+		public async Task DeleteTaskAsync([FromRoute] Guid taskId)
+		{
+
+			var task = await _taskItemRepository.GetByIdAsync(taskId);
+			if (task == null)
+			{
+				throw new DomainValidationException("Task not found.");
+			}
+
+			task.Status = TaskItemStatus.Deleted;
+
+			await _taskItemRepository.UpdateAsync(task);
+
+		}
 	}
 }

@@ -1,0 +1,72 @@
+﻿@page "/to-do-list"
+
+@using ToDoListContracts;
+@using ToDoList.WebUi.ApiClients;
+@inject IToDoListApiClient ToDoListApiClient;
+@inject IToastService ToastService
+
+<PageTitle>Tasks</PageTitle>
+
+<h1>Add Task</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <h3>Task Form</h3>
+        <div class="form-group">
+            <label for="taskContent">Task Content:</label>
+            <input type="text" class="form-control" id="taskContent" @bind="taskContent" />
+        </div>
+        <div class="form-group">
+            <label for="taskDate">Task Date:</label>
+            <input type="date" class="form-control" id="taskDate" @bind="taskDate" />
+        </div>
+        <button class="btn btn-primary" @onclick="AddTask">Add Task</button>
+    </div>
+    <div class="col-md-8">
+        <h3>Calendar</h3>
+        <input type="date" @bind="selectedDate" />
+        <button class="btn btn-secondary" @onclick="LoadTasksForDate">Load Tasks</button>
+        <div>
+            <h4>Tasks for @selectedDate.ToShortDateString()</h4>
+            @if (tasks != null)
+            {
+                foreach (var task in tasks)
+                {
+                    <div>@task.Content</div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string taskContent = "";
+    private DateTime taskDate = DateTime.Today;
+    private DateTime selectedDate = DateTime.Today;
+    private IEnumerable<TaskItemDto> tasks;
+
+    private async Task AddTask()
+    {
+        if (!string.IsNullOrWhiteSpace(taskContent))
+        {
+            var utcTaskDate = taskDate.ToUniversalTime().Date;
+
+            var taskId = await ToDoListApiClient.AddTaskItemAsync(utcTaskDate, taskContent);
+            // Optionally, you can handle the response here
+            // For example, display a success message or navigate to another page
+            Console.WriteLine($"Task added with ID: {taskId}");
+            // Reset taskContent or any other necessary fields
+            taskContent = "";
+        }
+        else
+        {
+            // Handle empty taskContent error
+            Console.WriteLine("Task content cannot be empty.");
+        }
+    }
+
+    private async Task LoadTasksForDate()
+    {
+        tasks = await ToDoListApiClient.GetQuestionsForDateAsync(selectedDate);
+    }
+}

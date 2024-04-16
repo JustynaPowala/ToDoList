@@ -23,7 +23,9 @@ namespace ToDoList.WebApi.EF.Repositories
 
 		public async Task<IEnumerable<TaskItem>> GetAllForDateAsync(DateTime date)
 		{
-			return await _tasks.Where(x=>x.Date.Date == date.Date && x.Status != TaskItemStatus.Deleted).OrderBy(x => x.CreatedDate).ToListAsync();
+			return await _tasks.Where(x=>x.Date.Date == date.Date && x.Status != TaskItemStatus.Deleted)
+				.OrderBy(x => x.CreatedDate)
+				.ToListAsync();
 
 		}
 

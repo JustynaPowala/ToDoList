@@ -6,9 +6,14 @@ using System.Threading.Tasks;
 
 namespace ToDoListContracts
 {
-	public class AddTaskItemDto
+	public class ErrorInfo
 	{
-		public DateTime Date { get; set; }
-		public string Content { get; set; }
+		public ErrorInfo(string message)
+		{
+			Message = message;
+		}
+
+
+		public string Message { get; set; }
 	}
 }

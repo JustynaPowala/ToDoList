@@ -13,7 +13,7 @@ namespace ToDoList.WebApi.EF.Configurations
 
 			builder.Property(t => t.Date).IsRequired();
 
-			builder.Property(t => t.Content).HasMaxLength(255).IsRequired();
+			builder.Property(t => t.Content).HasMaxLength(255).IsRequired(false);
 
 			builder.Property(t => t.CreatedDate).IsRequired();
 

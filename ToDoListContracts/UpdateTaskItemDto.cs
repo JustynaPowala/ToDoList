@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace ToDoListContracts
 {
-	public class AddTaskItemDto
+	public class UpdateTaskItemDto
 	{
-		public DateTime Date { get; set; }
 		public string Content { get; set; }
+		public string Status { get; set; }
+	
 	}
 }

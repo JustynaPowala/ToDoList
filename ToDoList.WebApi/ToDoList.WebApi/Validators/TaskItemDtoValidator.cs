@@ -11,10 +11,8 @@ namespace ToDoList.WebApi.Validators
 			{
 				throw new DomainValidationException("Content is required");
 			}
-
 		}
-
-		public void Validate(string content, string status)
+	public TaskItemStatus Validate(string content, string status)
 		{
 			if (string.IsNullOrEmpty(content))
 			{
@@ -24,6 +22,10 @@ namespace ToDoList.WebApi.Validators
 			if (Enum.TryParse<TaskItemStatus>(status, true, out var s) == false)
 			{
 				throw new DomainValidationException($"Status {status} is invalid.");
+			}
+			else
+			{
+				return s;
 			}
 
 		}
