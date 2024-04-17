@@ -7,9 +7,12 @@
 
 <PageTitle>Tasks</PageTitle>
 
-<h1>Add Task</h1>
+<h1>Your To-do list</h1>
 
 <div class="row">
+    <div class="col-md-1">
+
+    </div>
     <div class="col-md-2">
         <label for="taskDate">Choose date:</label>
 
@@ -17,8 +20,8 @@
 
     <div class="col-md-4">
 
-        <input type="date" class="form-control" id="taskDate" @bind="TaskDate"  />
-
+        <input type="date" class="form-control" id="taskDate" @onchange= "ChangeTasksDate" />
+        <br />
     </div>
 
     <div class="col-md-6">
@@ -27,102 +30,171 @@
 </div>
 
 <div class="row">
-    <div class="col-md-10">
-        <input type="text" class="form-control" id="taskContent" @bind="taskContent" />
+    <div class="col-md-1">
+
+    </div>
+   
+    <div class="col-md-8">
+        <input type="text" class="form-control" placeholder="Input task content..." id="taskContent" @bind="_taskContent" @ref="_taskContentInput" />
 
     </div>
 
-    <div class="col-md-2">
+    <div class="col-md-3">
 
-        <button class="btn btn-primary" @onclick="AddTask">Add Task</button>
+        <button class="btn btn-info" @onclick="AddTaskAsync">Add task</button>
     </div>
 </div>
 
 <div class="row">
+    <div class="col-md-1">
+    </div>
 
-
-    @if (tasks != null)
-    {
-        foreach (var task in tasks)
+    <div class="col-md-10">
+    @if (_tasks != null)
         {
-            //var checked = task.Status == "Done";
-            var isChecked = task.Status == "Done";
-            <div class="col-md-10">@task.Content</div>
-            <div class ="col-md-1">
-                <input type="radio" name="IsSelected" checked="@isChecked" class="checkbox-design2" @onchange="() => ChangeStatus(task)"  />
-            </div>
-            <div class="col-md-1"> </div>
-        }
-    }
+            var taskCounter = 1;
 
+            <br />
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                   <th style="width: 10%; text-align: center;">No.</th>
 
-    </div>
+                    <th style="width: 70%; text-align: center;">Tasks for @_taskDate.ToShortDateString()</th>
+                    <th style="width: 10%; text-align: center;">Done</th>
+                    <th style="width: 10%; text-align: center;">Remove</th>
+                </tr>
+            </thead>
+            <tbody>
 
-
-@*<div class="row">
-    <div class="col-md-4">
-        <h3>Task Form</h3>
-        <div class="form-group">
-            <label for="taskContent">Task Content:</label>
-            <input type="text" class="form-control" id="taskContent" @bind="taskContent" />
-        </div>
-        <div class="form-group">
-            <label for="taskDate">Task Date:</label>
-            <input type="date" class="form-control" id="taskDate" @bind="taskDate" />
-        </div>
-        <button class="btn btn-primary" @onclick="AddTask">Add Task</button>
-    </div>
-    <div class="col-md-8">
-        <h3>Calendar</h3>
-        <input type="date" @bind="selectedDate" />
-        <button class="btn btn-secondary" @onclick="LoadTasksForDate">Load Tasks</button>
-        <div>
-            <h4>Tasks for @selectedDate.ToShortDateString()</h4>
-            @if (tasks != null)
-            {
-                foreach (var task in tasks)
+                @foreach (var task in _tasks)
                 {
-                    <div>@task.Content</div>
+
+                    var isChecked = task.Status == "Done";
+
+                    <tr>
+                            <td style="text-align: center;">@(taskCounter++).</td>
+
+                            <td style="text-align: center;">
+                                <input type="text" @bind="@task.Content" @oninput="e => OnTaskContentChange(e, task)" @onblur="()=>OnTaskContentChanged(task)" style="width: calc(100% - 10px); padding: 5px; overflow-wrap: break-word;" />
+                        </td>
+                        <td style="text-align: center;">
+
+
+                                <input type="checkbox" name="IsSelected" checked="@isChecked" style="width: 30px; height: 30px; accent-color: green;" @onchange="() => ChangeStatus(task)" />
+
+                        </td>
+                        <td style="text-align: center;"><button  @onclick="() => DeleteTaskAsync(task)"><i class="oi oi-trash"></i></button></td>
+
+                    </tr>
                 }
-            }
-        </div>
+            </tbody>
+        </table>
+       
+    }
     </div>
-</div>
-*@
+    <div class="col-md-1">
+    </div>
+
+    </div>
+
+
+
+
 @code {
 
 
-    private string taskContent = "";
-    private DateTime TaskDate {
-        get { return taskDate; }
-        set
+    private string _taskContent = "";
+    //private DateTime TaskDate {
+    //    get { return taskDate; }
+    //    set
+    //    {
+    //        taskDate = value;
+    //        LoadTasksForDate();
+    //    }
+    //}
+    private DateTime _taskDate = DateTime.Today;
+    private DateTime _selectedDate = DateTime.Today;
+    private IEnumerable<TaskItemDto> _tasks;
+    private ElementReference _taskContentInput;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTasksForDate();
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        await FocusTaskContent();
+
+    }
+
+    private async Task FocusTaskContent()
+    {
+        await _taskContentInput.FocusAsync();
+    }
+
+
+    private async Task ChangeTasksDate(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), out DateTime selectedDate))
         {
-            taskDate = value;
-            LoadTasksForDate();
+            _taskDate = selectedDate;
+            await LoadTasksForDate();
         }
     }
-    private DateTime taskDate = DateTime.Today;
-    private DateTime selectedDate = DateTime.Today;
-    private IEnumerable<TaskItemDto> tasks;
 
-    private async Task AddTask()
+    private async Task OnTaskContentChange(ChangeEventArgs e, TaskItemDto taskItem)
     {
-        if (!string.IsNullOrWhiteSpace(taskContent))
-        {
-            var date = taskDate.Date;
+        taskItem.Content = e.Value.ToString();
 
-            var taskId = await ToDoListApiClient.AddTaskItemAsync(date, taskContent);
-            // Optionally, you can handle the response here
-            // For example, display a success message or navigate to another page
-            Console.WriteLine($"Task added with ID: {taskId}");
-            // Reset taskContent or any other necessary fields
-            taskContent = "";
-        }
-        else
+    }
+
+
+    private async Task OnTaskContentChanged(TaskItemDto taskItem)
+    {
+        await ChangeContent(taskItem);
+        //ToastService.ShowSuccess("Content of the task ahs been changed.");
+        await LoadTasksForDate();
+
+
+    }
+
+    private async Task DeleteTaskAsync(TaskItemDto taskItem)
+    {
+        if(await DeleteTask(taskItem))
         {
-            // Handle empty taskContent error
-            Console.WriteLine("Task content cannot be empty.");
+            await LoadTasksForDate();
+            ToastService.ShowSuccess("Task has been deleted.");
         }
+      
+
+    }
+
+    private async Task AddTaskAsync()
+    {
+        if( await AddTask())
+        {
+            ToastService.ShowSuccess("Task has been added.");
+            await LoadTasksForDate();
+
+        };
+
+    }
+
+
+    //below API client methods
+    private async Task<bool> AddTask()
+    {
+        return await ErrorCatcherAsync(async () =>
+        {
+            var date = _taskDate.Date;
+            var taskId = await ToDoListApiClient.AddTaskItemAsync(date, _taskContent);
+            _taskContent = "";
+        });  
     }
 
     private async Task<bool> ChangeStatus(TaskItemDto taskItem)
@@ -143,10 +215,30 @@
     }
 
 
-    private async Task LoadTasksForDate()
+    private async Task<bool> LoadTasksForDate()
     {
-        tasks = await ToDoListApiClient.GetQuestionsForDateAsync(taskDate);
+        return await ErrorCatcherAsync(async () =>
+        {
+            _tasks = await ToDoListApiClient.GetQuestionsForDateAsync(_taskDate);
+        });
     }
+
+    private async Task<bool> DeleteTask(TaskItemDto taskItem)
+    {
+        return await ErrorCatcherAsync(async () =>
+        {
+             await ToDoListApiClient.DeleteItemAsync(taskItem.Id);
+        });
+    }
+
+    private async Task<bool> ChangeContent(TaskItemDto taskItem)
+    {
+        return await ErrorCatcherAsync(async () =>
+        {
+           await ToDoListApiClient.UpdateItemContentAsync(taskItem.Id, taskItem.Content);
+        });
+    }
+
 
 
     private async Task<bool> ErrorCatcherAsync(Func<Task> action)

@@ -10,3 +10,11 @@
         </LayoutView>
     </NotFound>
 </Router>
+@code {
+    [Inject] NavigationManager NavigationManager { get; set; }
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/to-do-list"); 
+    }
+}

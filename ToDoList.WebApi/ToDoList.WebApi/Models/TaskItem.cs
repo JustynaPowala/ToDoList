@@ -74,6 +74,8 @@ namespace ToDoList.WebApi.Models
             {
                 throw new DomainValidationException("Task is already deleted.");
             }
+
+			Status = TaskItemStatus.Deleted;
         }
 
 	}
