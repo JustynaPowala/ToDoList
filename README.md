@@ -1,4 +1,4 @@
-# Quiz - Spis treści
+# To-do list - Contents
 1. [Introduction](#introduction)
 2. [How to run the program](#how-to-run-the-program)
 3. [Application overview](#application-overview)
@@ -9,11 +9,11 @@ ToDoList is ASP.NET Core application, built in client-server architecture. It al
 
 # How to run the program
 1. You should have .NET 7.0 installed.
-2. Expand start and select "Configure Startup Projects"
+2. Expand start and select "Configure Startup Projects".
 
 ![image](https://github.com/JustynaPowala/ToDoList/assets/124584877/e05f1c32-18f1-4d84-99ce-d9df17221b34)
 
-3. Set "Start" for ToDoList.WebApi & ToDoList.WebUI
+3. Set "Start" for ToDoList.WebApi & ToDoList.WebUI.
 ![image](https://github.com/JustynaPowala/ToDoList/assets/124584877/8cd003e1-e309-4faa-aace-c03825d7a39b)
 
 Then start the program.
@@ -24,7 +24,7 @@ You can add tasks for different days.
 
 ![image](https://github.com/JustynaPowala/ToDoList/assets/124584877/aa730fa9-5315-4cb4-9ea1-295e881418d2)
 
-You can mark them as done. If you make a mistake, you can deselect them.
+You can mark them as done. If you make a mistake, you can move them back to "to do".
 
 ![image](https://github.com/JustynaPowala/ToDoList/assets/124584877/af3874ff-ab24-4235-ac19-f847964f071c)
 
@@ -36,7 +36,8 @@ Before:
 After:
 ![image](https://github.com/JustynaPowala/ToDoList/assets/124584877/9fbc88c5-23ed-4b4a-8726-459b2c74b23c)
 
-You can change content on typing:
+You can directly modify the content of the tasks on the list.
+
 ![image](https://github.com/JustynaPowala/ToDoList/assets/124584877/14d97124-5922-4296-8699-c99dfade2ac1)
 ->
 
