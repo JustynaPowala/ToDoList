@@ -19,7 +19,6 @@ namespace ToDoList.WebApi
             }
             else if (context.Exception is EntityNotFoundException entityNotFound)
             {
-
                 context.Result = new ObjectResult(new ErrorInfo(entityNotFound.Message))
                 {
                     StatusCode = (int)HttpStatusCode.NotFound
@@ -33,9 +32,5 @@ namespace ToDoList.WebApi
                 };
             }
         }
-
-
     }
-
-
 }

@@ -11,101 +11,85 @@ namespace ToDoList.WebApi.Controllers
 {
 
 
-	[ApiController]
-	[Route("[controller]")]
-	public class TaskItemsController
-	{
-		private readonly ITaskItemRepository _taskItemRepository;
+    [ApiController]
+    [Route("[controller]")]
+    public class TaskItemsController
+    {
+        private readonly ITaskItemRepository _taskItemRepository;
+        public TaskItemsController(ITaskItemRepository taskItemRepository)
+        {
+            _taskItemRepository = taskItemRepository;
+        }
 
-		public TaskItemsController(ITaskItemRepository taskItemRepository)
-		{
-			_taskItemRepository = taskItemRepository;
-		}
+        [HttpPost("")]
+        public async Task<Guid> AddTaskItemAsync([FromBody] AddTaskItemDto taskDto)
+        {
+            var id = Guid.NewGuid();
+            var newTaskItem = TaskItem.Create(id, taskDto.Date.Date, taskDto.Content);
+            await _taskItemRepository.AddAsync(newTaskItem);
+            return id;
+        }
 
-		[HttpPost("")]
-		public async Task<Guid> AddTaskItemAsync([FromBody] AddTaskItemDto taskDto)
-		{
-			
-			var id = Guid.NewGuid();
-			var newTaskItem = TaskItem.Create(id, taskDto.Date.Date, taskDto.Content);
+        [HttpGet("{taskId}")]
+        public async Task<TaskItemDto> GetTaskItemAsync([FromRoute] Guid taskId)
+        {
+            var taskItem = await _taskItemRepository.GetByIdAsync(taskId);
+            var ti = Convert(taskItem);
+            return ti;
+        }
 
-			await _taskItemRepository.AddAsync(newTaskItem);
+        [HttpGet("")]
+        public async Task<IEnumerable<TaskItemDto>> GetTaskItemsForDate([FromQuery] DateTime date)
+        {
+            var tasks = await _taskItemRepository.GetAllForDateAsync(date.Date);
 
-			return id;
-		}
+            var tasksDto = tasks.Select(x => Convert(x));
 
-		[HttpGet("{taskId}")]
-		public async Task<TaskItemDto> GetTaskItemAsync([FromRoute] Guid taskId)
-		{
-			var taskItem = await _taskItemRepository.GetByIdAsync(taskId);
+            return tasksDto;
+        }
 
-			var ti = Convert(taskItem);
-		
-			return ti;
-		}
+        [HttpPut("{taskId}/content")]
+        public async Task UpdateContentAsync([FromRoute] Guid taskId, [FromBody] UpdateTaskItemContentDto taskItem)
+        {
+            var task = await _taskItemRepository.GetByIdAsync(taskId);
 
-		[HttpGet("")]
-		public async Task<IEnumerable<TaskItemDto>> GetTaskItemsForDate([FromQuery] DateTime date)
-		{
-			var tasks = await _taskItemRepository.GetAllForDateAsync(date.Date);
+            task.DefineContent(taskItem.Content);
+            await _taskItemRepository.UpdateAsync(task);
+        }
 
-			var tasksDto= tasks.Select(x=> Convert(x));
-			
-			return tasksDto;
-		}
-
-		[HttpPut("{taskId}/content")]   
-		public async Task UpdateContentAsync([FromRoute] Guid taskId, [FromBody] UpdateTaskItemContentDto taskItem)
-		{
-			var task = await _taskItemRepository.GetByIdAsync(taskId);
-
-			task.DefineContent(taskItem.Content);
-
-			await _taskItemRepository.UpdateAsync(task);
-
-		}
-		
-		[HttpPut("{taskId}/status")] 
+        [HttpPut("{taskId}/status")]
         public async Task UpdateStatusAsync([FromRoute] Guid taskId, [FromBody] UpdateTaskItemStatusDto taskItem)
         {
             if (Enum.TryParse<TaskItemStatus>(taskItem.Status, true, out var s) == false)
             {
-				throw new ArgumentException($"Status {taskItem.Status} is not valid.",nameof(taskItem));
+                throw new ArgumentException($"Status {taskItem.Status} is not valid.", nameof(taskItem));
             }
 
             var task = await _taskItemRepository.GetByIdAsync(taskId);
             switch (s)
-			{
-				case TaskItemStatus.Done:
-					task.Complete();
-					break;
-				case TaskItemStatus.ToDo:
-					task.MoveBackToToDo();
-				break;
-				default:
-					throw new ArgumentOutOfRangeException("Only 'Done' or 'ToDo' statuses are valid.");
+            {
+                case TaskItemStatus.Done:
+                    task.Complete();
+                    break;
+                case TaskItemStatus.ToDo:
+                    task.MoveBackToToDo();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("Only 'Done' or 'ToDo' statuses are valid.");
 
-			}
-
+            }
             await _taskItemRepository.UpdateAsync(task);
-
         }
 
         [HttpDelete("{taskId}")]
-		public async Task DeleteTaskAsync([FromRoute] Guid taskId)
-		{
-
-			var task = await _taskItemRepository.GetByIdAsync(taskId);
-			
-
-			task.Delete();
-
-			await _taskItemRepository.UpdateAsync(task);
-
-		}
-
-		public static TaskItemDto Convert(TaskItem taskItem)
-		{
+        public async Task DeleteTaskAsync([FromRoute] Guid taskId)
+        {
+            var task = await _taskItemRepository.GetByIdAsync(taskId);
+            task.Delete();
+            await _taskItemRepository.UpdateAsync(task);
+        }
+        public static TaskItemDto Convert(TaskItem taskItem)
+        {
             var ti = new TaskItemDto
             {
                 Id = taskItem.Id,
@@ -114,9 +98,7 @@ namespace ToDoList.WebApi.Controllers
                 Status = taskItem.Status.ToString(),
                 CreatedDate = taskItem.CreatedDate.Date,
             };
-
-			return ti;
-
+            return ti;
         }
     }
 }

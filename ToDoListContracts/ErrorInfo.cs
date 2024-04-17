@@ -12,8 +12,6 @@ namespace ToDoListContracts
 		{
 			Message = message;
 		}
-
-
 		public string Message { get; set; }
 	}
 }

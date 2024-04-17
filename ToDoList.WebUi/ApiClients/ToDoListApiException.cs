@@ -3,6 +3,5 @@
 	public class ToDoListApiException : Exception
 	{
 		public string Message { get; set; }
-
 	}
 }

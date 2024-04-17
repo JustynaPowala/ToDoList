@@ -5,98 +5,109 @@
 @inject IToDoListApiClient ToDoListApiClient;
 @inject IToastService ToastService
 
+
+
+
 <PageTitle>Tasks</PageTitle>
 
 <h1>Your To-do list</h1>
 
 <div class="row">
-    <div class="col-md-1">
+	<div class="col-md-1">
+	</div>
+	<div class="col-md-2">
+		<label for="taskDate">Choose date:</label>
 
-    </div>
-    <div class="col-md-2">
-        <label for="taskDate">Choose date:</label>
+	</div>
 
-    </div>
+	<div class="col-md-2">
 
-    <div class="col-md-4">
+		<InputDate id="taskDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" TValue="DateTime" Value="_taskDate" ValueChanged="async d => { await ChangeTasksDate(d); }" ValueExpression="() => _taskDate"></InputDate>
 
-        <input type="date" class="form-control" id="taskDate" @onchange= "ChangeTasksDate" />
-        <br />
-    </div>
-
-    <div class="col-md-6">
-
-    </div>
+	</div>
+	<div class="col-md-6">
+	</div>
 </div>
 
 <div class="row">
-    <div class="col-md-1">
-
-    </div>
-   
-    <div class="col-md-8">
-        <input type="text" class="form-control" placeholder="Input task content..." id="taskContent" @bind="_taskContent" @ref="_taskContentInput" />
-
-    </div>
-
-    <div class="col-md-3">
-
-        <button class="btn btn-info" @onclick="AddTaskAsync">Add task</button>
-    </div>
+	<div class="col-md-12">
+		&nbsp;
+	</div>
 </div>
 
 <div class="row">
-    <div class="col-md-1">
-    </div>
+	<div class="col-md-1">
+	</div>
 
-    <div class="col-md-10">
-    @if (_tasks != null)
-        {
-            var taskCounter = 1;
+	<div class="col-md-8">
+		<input type="text" class="form-control" placeholder="Input task content..." id="taskContent" @bind="_taskContent" @ref="_taskContentInput" />
 
-            <br />
-        <table class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                   <th style="width: 10%; text-align: center;">No.</th>
+	</div>
 
-                    <th style="width: 70%; text-align: center;">Tasks for @_taskDate.ToShortDateString()</th>
-                    <th style="width: 10%; text-align: center;">Done</th>
-                    <th style="width: 10%; text-align: center;">Remove</th>
-                </tr>
-            </thead>
-            <tbody>
+	<div class="col-md-3">
 
-                @foreach (var task in _tasks)
-                {
+		<button class="btn btn-info" @onclick="AddTaskAsync">Add task</button>
+	</div>
+</div>
 
-                    var isChecked = task.Status == "Done";
+<div class="row">
+	<div class="col-md-12">
+		&nbsp;
+	</div>
+</div>
 
-                    <tr>
-                            <td style="text-align: center;">@(taskCounter++).</td>
+<div class="row">
+	<div class="col-md-1">
+	</div>
 
-                            <td style="text-align: center;">
-                                <input type="text" @bind="@task.Content" @oninput="e => OnTaskContentChange(e, task)" @onblur="()=>OnTaskContentChanged(task)" style="width: calc(100% - 10px); padding: 5px; overflow-wrap: break-word;" />
-                        </td>
-                        <td style="text-align: center;">
+	<div class="col-md-10">
+		@if (_tasks != null)
+		{
+			var taskCounter = 1;
+
+			
+			<table class="table table-striped table-bordered">
+				<thead>
+					<tr>
+						<th style="width: 5%; text-align: center;">No.</th>
+
+						<th style="width: 75%; text-align: center;">Tasks for @_taskDate.ToShortDateString()</th>
+						<th style="width: 10%; text-align: center;">Done</th>
+						<th style="width: 10%; text-align: center;">Remove</th>
+					</tr>
+				</thead>
+				<tbody>
+
+					@foreach (var task in _tasks)
+					{
+
+						var isChecked = task.Status == "Done";
+
+						<tr>
+							<td style="text-align: center;">@(taskCounter++).</td>
+
+							<td style="text-align: center; height:auto">
+								<input type="text" @bind="@task.Content" @oninput="e => OnTaskContentChange(e, task)" @onblur="()=>OnTaskContentChanged(task)" style="width: calc(100% - 10px); padding: 5px; text-overflow: ellipsis;" />
+							</td>
+							<td style="text-align: center;">
 
 
-                                <input type="checkbox" name="IsSelected" checked="@isChecked" style="width: 30px; height: 30px; accent-color: green;" @onchange="() => ChangeStatus(task)" />
+								<input type="checkbox" name="IsSelected" checked="@isChecked" style="width: 30px; height: 30px; accent-color: green;" @onchange="() => ChangeStatusAsync(task)" />
 
-                        </td>
-                        <td style="text-align: center;"><button  @onclick="() => DeleteTaskAsync(task)"><i class="oi oi-trash"></i></button></td>
+							</td>
+							<td style="text-align: center;"><button @onclick="() => DeleteTaskAsync(task)"><i class="oi oi-trash"></i></button></td>
 
-                    </tr>
-                }
-            </tbody>
-        </table>
-       
-    }
-    </div>
-    <div class="col-md-1">
-    </div>
+						</tr>
+					}
+				</tbody>
+			</table>
 
-    </div>
+		}
+	</div>
+	<div class="col-md-1">
+	</div>
+
+</div>
 
 
 
@@ -104,156 +115,157 @@
 @code {
 
 
-    private string _taskContent = "";
-    //private DateTime TaskDate {
-    //    get { return taskDate; }
-    //    set
-    //    {
-    //        taskDate = value;
-    //        LoadTasksForDate();
-    //    }
-    //}
-    private DateTime _taskDate = DateTime.Today;
-    private DateTime _selectedDate = DateTime.Today;
-    private IEnumerable<TaskItemDto> _tasks;
-    private ElementReference _taskContentInput;
+	private string _taskContent = "";
+	//private DateTime TaskDate {
+	//    get { return taskDate; }
+	//    set
+	//    {
+	//        taskDate = value;
+	//        LoadTasksForDate();
+	//    }
+	//}
+
+	private DateTime _taskDate = DateTime.Today;
+	private DateTime _selectedDate = DateTime.Today;
+	private IEnumerable<TaskItemDto> _tasks;
+	private ElementReference _taskContentInput;
 
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadTasksForDate();
+	protected override async Task OnInitializedAsync()
+	{
+		_taskDate = DateTime.Today;
+		await LoadTasksForDate();
 
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-
-        await FocusTaskContent();
-
-    }
-
-    private async Task FocusTaskContent()
-    {
-        await _taskContentInput.FocusAsync();
-    }
+	}
 
 
-    private async Task ChangeTasksDate(ChangeEventArgs e)
-    {
-        if (DateTime.TryParse(e.Value?.ToString(), out DateTime selectedDate))
-        {
-            _taskDate = selectedDate;
-            await LoadTasksForDate();
-        }
-    }
+	private async Task ChangeTasksDate(DateTime e)
+	{
+		//if (DateTime.TryParse(e.Value?.ToString(), out DateTime selectedDate))
+		//{
+			_taskDate = e;
+			await LoadTasksForDate();
+		//}
+	}
 
-    private async Task OnTaskContentChange(ChangeEventArgs e, TaskItemDto taskItem)
-    {
-        taskItem.Content = e.Value.ToString();
+	private async Task OnTaskContentChange(ChangeEventArgs e, TaskItemDto taskItem)
+	{
+		taskItem.Content = e.Value.ToString();
 
-    }
-
-
-    private async Task OnTaskContentChanged(TaskItemDto taskItem)
-    {
-        await ChangeContent(taskItem);
-        //ToastService.ShowSuccess("Content of the task ahs been changed.");
-        await LoadTasksForDate();
+	}
 
 
-    }
-
-    private async Task DeleteTaskAsync(TaskItemDto taskItem)
-    {
-        if(await DeleteTask(taskItem))
-        {
-            await LoadTasksForDate();
-            ToastService.ShowSuccess("Task has been deleted.");
-        }
-      
-
-    }
-
-    private async Task AddTaskAsync()
-    {
-        if( await AddTask())
-        {
-            ToastService.ShowSuccess("Task has been added.");
-            await LoadTasksForDate();
-
-        };
-
-    }
-
-
-    //below API client methods
-    private async Task<bool> AddTask()
-    {
-        return await ErrorCatcherAsync(async () =>
-        {
-            var date = _taskDate.Date;
-            var taskId = await ToDoListApiClient.AddTaskItemAsync(date, _taskContent);
-            _taskContent = "";
-        });  
-    }
-
-    private async Task<bool> ChangeStatus(TaskItemDto taskItem)
-    {
-        return await ErrorCatcherAsync(async () =>
-        {
-            string status;
-            if(taskItem.Status == "Done")
-            {
-                status = "ToDo";
-            }
-            else
-            {
-                status = "Done";
-            }
-            await ToDoListApiClient.UpdateItemStatusAsync(taskItem.Id, status);
-        });
-    }
-
-
-    private async Task<bool> LoadTasksForDate()
-    {
-        return await ErrorCatcherAsync(async () =>
-        {
-            _tasks = await ToDoListApiClient.GetQuestionsForDateAsync(_taskDate);
-        });
-    }
-
-    private async Task<bool> DeleteTask(TaskItemDto taskItem)
-    {
-        return await ErrorCatcherAsync(async () =>
-        {
-             await ToDoListApiClient.DeleteItemAsync(taskItem.Id);
-        });
-    }
-
-    private async Task<bool> ChangeContent(TaskItemDto taskItem)
-    {
-        return await ErrorCatcherAsync(async () =>
-        {
-           await ToDoListApiClient.UpdateItemContentAsync(taskItem.Id, taskItem.Content);
-        });
-    }
+	private async Task OnTaskContentChanged(TaskItemDto taskItem)
+	{
+		await ChangeContent(taskItem);
+		await _taskContentInput.FocusAsync();
 
 
 
-    private async Task<bool> ErrorCatcherAsync(Func<Task> action)
-    {
-        try
-        {
-            await action();
-            return true;
-        }
-        catch (ToDoListApiException quizApiException)
-        {
-            ToastService.ShowError(quizApiException.Message);
-            return false;
-        }
-    }
+	}
+
+	private async Task DeleteTaskAsync(TaskItemDto taskItem)
+	{
+		if (await DeleteTask(taskItem))
+		{
+			await LoadTasksForDate();
+			ToastService.ShowSuccess("Task has been deleted.");
+		}
+
+
+	}
+
+	private async Task AddTaskAsync()
+	{
+		if (await AddTask())
+		{
+			ToastService.ShowSuccess("Task has been added.");
+			await LoadTasksForDate();
+			await _taskContentInput.FocusAsync();
+
+
+		};
+
+	}
+
+	private async Task ChangeStatusAsync(TaskItemDto taskItem)
+	{
+		if (await ChangeStatus(taskItem))
+		{
+			await LoadTasksForDate();
+		};
+
+	}
+
+
+	//below API client methods
+	private async Task<bool> AddTask()
+	{
+		return await ErrorCatcherAsync(async () =>
+		{
+			var date = _taskDate.Date;
+			var taskId = await ToDoListApiClient.AddTaskItemAsync(date, _taskContent);
+			_taskContent = "";
+		});
+	}
+
+	private async Task<bool> ChangeStatus(TaskItemDto taskItem)
+	{
+		return await ErrorCatcherAsync(async () =>
+		{
+			string status;
+			if (taskItem.Status == "Done")
+			{
+				status = "ToDo";
+			}
+			else
+			{
+				status = "Done";
+			}
+			await ToDoListApiClient.UpdateItemStatusAsync(taskItem.Id, status);
+		});
+	}
+
+
+	private async Task<bool> LoadTasksForDate()
+	{
+		return await ErrorCatcherAsync(async () =>
+		{
+			_tasks = await ToDoListApiClient.GetQuestionsForDateAsync(_taskDate);
+		});
+	}
+
+	private async Task<bool> DeleteTask(TaskItemDto taskItem)
+	{
+		return await ErrorCatcherAsync(async () =>
+		{
+			await ToDoListApiClient.DeleteItemAsync(taskItem.Id);
+		});
+	}
+
+	private async Task<bool> ChangeContent(TaskItemDto taskItem)
+	{
+		return await ErrorCatcherAsync(async () =>
+		{
+			await ToDoListApiClient.UpdateItemContentAsync(taskItem.Id, taskItem.Content);
+		});
+	}
+
+
+
+	private async Task<bool> ErrorCatcherAsync(Func<Task> action)
+	{
+		try
+		{
+			await action();
+			return true;
+		}
+		catch (ToDoListApiException quizApiException)
+		{
+			ToastService.ShowError(quizApiException.Message);
+			return false;
+		}
+	}
 
 
 }

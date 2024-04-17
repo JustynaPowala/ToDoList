@@ -18,9 +18,6 @@ namespace ToDoList.WebApi
 			{
 				mvcOptions.Filters.Add(new ExceptionFilter());
 			});
-
-       
-
             services.AddEndpointsApiExplorer();
 			services.AddSwaggerGen();
             services.AddCors(options =>
@@ -39,15 +36,11 @@ namespace ToDoList.WebApi
             });
 
             services.AddScoped<ITaskItemRepository, TaskItemRepository>();
-
 			services.AddDbContext<ToDoListDbContext>(
 				option => option.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
 				);
 
 			var app = builder.Build();
-
-
-
 			if (app.Environment.IsDevelopment())
 			{
 				app.UseSwagger();
@@ -56,11 +49,7 @@ namespace ToDoList.WebApi
 
 			app.UseAuthorization();
             app.UseCors("AllowedCorsOrigins");
-
-
             app.MapControllers();
-
-
 			var scope = app.Services.CreateScope();
 			var dbContext = scope.ServiceProvider.GetService<ToDoListDbContext>();
 			var pendingMigrations = dbContext.Database.GetPendingMigrations();

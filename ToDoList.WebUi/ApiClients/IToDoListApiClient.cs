@@ -9,7 +9,5 @@ namespace ToDoList.WebUi.ApiClients
 		Task DeleteItemAsync(Guid id);
 		Task UpdateItemContentAsync(Guid id, string content);
         Task UpdateItemStatusAsync(Guid id, string status);
-
-
     }
 }

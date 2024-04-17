@@ -5,6 +5,5 @@
 		ToDo,
 		Done,
 		Deleted
-
 	}
 }
