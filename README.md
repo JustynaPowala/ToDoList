@@ -29,6 +29,7 @@ You can mark them as done. If you make a mistake, you can deselect them.
 ![image](https://github.com/JustynaPowala/ToDoList/assets/124584877/af3874ff-ab24-4235-ac19-f847964f071c)
 
 You can also delete them.
+
 Before:
 ![image](https://github.com/JustynaPowala/ToDoList/assets/124584877/51b6df32-be89-48a0-b61c-833bdf850f5e)
 
