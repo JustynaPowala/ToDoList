@@ -5,7 +5,7 @@
 
 
 # Introduction
-ToDoList is ASP.NET Core application, built in client-server architecture. It allows you to create your own lists with tasks to do. The technologies I used are ASP.NET Core, Blazor, & EF.
+ToDoList is ASP.NET Core application, built in client-server architecture. It allows you to create your own lists with tasks to do. The technologies I used are ASP.NET Core, Blazor & EF.
 
 # How to run the program
 1. You should have .NET 7.0 installed.
