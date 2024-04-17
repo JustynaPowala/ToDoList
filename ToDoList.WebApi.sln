@@ -5,9 +5,9 @@ VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToDoList.WebApi", "ToDoList.WebApi\ToDoList.WebApi.csproj", "{D26C2019-0F9D-444F-9996-D4DA7C7426C8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToDoList.WebUi", "..\ToDoList.WebUi\ToDoList.WebUi.csproj", "{C5CB70FC-90A1-4935-8099-7BDFB5E80A54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ToDoList.WebUi", "ToDoList.WebUi\ToDoList.WebUi.csproj", "{C5CB70FC-90A1-4935-8099-7BDFB5E80A54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDoListContracts", "..\ToDoListContracts\ToDoListContracts.csproj", "{988A1BB4-BBCA-4131-84D6-D043D411F391}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDoListContracts", "ToDoListContracts\ToDoListContracts.csproj", "{988A1BB4-BBCA-4131-84D6-D043D411F391}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

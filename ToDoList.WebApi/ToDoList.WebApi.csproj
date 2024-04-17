@@ -18,8 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ToDoList.WebUi\ToDoList.WebUi.csproj" />
-    <ProjectReference Include="..\..\ToDoListContracts\ToDoListContracts.csproj" />
+    <ProjectReference Include="..\ToDoListContracts\ToDoListContracts.csproj" />
   </ItemGroup>
 
 </Project>
